@@ -105,8 +105,7 @@ static inline bool msgpack_zbuffer_expand(msgpack_zbuffer* zbuf)
 
     size_t nsize = (csize == 0) ? zbuf->init_size : csize * 2;
 
-    //char* tmp = (char*)realloc(zbuf->data, nsize);
-    tmp = pvPortMalloc(nsizee);
+    char* tmp = (char*)pvPortRealloc(zbuf->data, nsize);
     if(tmp == NULL) {
         return false;
     }

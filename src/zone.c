@@ -141,9 +141,8 @@ bool msgpack_zone_push_finalizer_expand(msgpack_zone* zone,
         nnext = nused * 2;
     }
 
-    //tmp = (msgpack_zone_finalizer*)realloc(fa->array,
-     //           sizeof(msgpack_zone_finalizer) * nnext);
-    tmp = (msgpack_zone_finalizer*)pvPortMalloc(sizeof(msgpack_zone_finalizer) * nnext);
+    tmp = (msgpack_zone_finalizer*)pvPortRealloc(fa->array,
+                sizeof(msgpack_zone_finalizer) * nnext);
     if(tmp == NULL) {
         return false;
     }

@@ -108,9 +108,8 @@ int msgpack_vrefbuffer_append_ref(msgpack_vrefbuffer* vbuf,
         const size_t nused = (size_t)(vbuf->tail - vbuf->array);
         const size_t nnext = nused * 2;
 
-        /*struct iovec* nvec = (struct iovec*)realloc(
-                vbuf->array, sizeof(struct iovec)*nnext);*/
-        struct iovec* nvec = (struct iovec*)pvPortMalloc(sizeof(struct iovec)*nnext);
+        struct iovec* nvec = (struct iovec*)pvPortRealloc(
+                vbuf->array, sizeof(struct iovec)*nnext);
         if(nvec == NULL) {
             return -1;
         }
@@ -202,9 +201,8 @@ int msgpack_vrefbuffer_migrate(msgpack_vrefbuffer* vbuf, msgpack_vrefbuffer* to)
                 nnext = tmp_nnext;
             }
 
-            //nvec = (struct iovec*)realloc(
-            //        to->array, sizeof(struct iovec)*nnext);
-            nvec = (struct iovec*)pvPortMalloc(sizeof(struct iovec)*nnext);
+            nvec = (struct iovec*)pvPortRealloc(
+                    to->array, sizeof(struct iovec)*nnext);
             if(nvec == NULL) {
                 vPortFree(empty);
                 return -1;

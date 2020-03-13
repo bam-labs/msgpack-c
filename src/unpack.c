@@ -452,8 +452,7 @@ bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size)
             next_size = tmp_next_size;
         }
 
-        //tmp = (char*)realloc(mpac->buffer, next_size);
-        tmp = pvPortMalloc(next_size);
+        tmp = (char*)pvPortRealloc(mpac->buffer, next_size);
         if(tmp == NULL) {
             return false;
         }
