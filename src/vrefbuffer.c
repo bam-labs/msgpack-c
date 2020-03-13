@@ -37,7 +37,7 @@ bool msgpack_vrefbuffer_init(msgpack_vrefbuffer* vbuf,
     nfirst = (sizeof(struct iovec) < 72/2) ?
             72 / sizeof(struct iovec) : 8;
 
-    array = (struct iovec*)malloc(
+    array = (struct iovec*)pvPortMalloc(
             sizeof(struct iovec) * nfirst);
     if(array == NULL) {
         return false;
@@ -47,10 +47,10 @@ bool msgpack_vrefbuffer_init(msgpack_vrefbuffer* vbuf,
     vbuf->end   = array + nfirst;
     vbuf->array = array;
 
-    chunk = (msgpack_vrefbuffer_chunk*)malloc(
+    chunk = (msgpack_vrefbuffer_chunk*)pvPortMalloc(
             sizeof(msgpack_vrefbuffer_chunk) + chunk_size);
     if(chunk == NULL) {
-        free(array);
+        vPortFree(array);
         return false;
     }
     else {
@@ -70,14 +70,14 @@ void msgpack_vrefbuffer_destroy(msgpack_vrefbuffer* vbuf)
     msgpack_vrefbuffer_chunk* c = vbuf->inner_buffer.head;
     while(true) {
         msgpack_vrefbuffer_chunk* n = c->next;
-        free(c);
+        vPortFree(c);
         if(n != NULL) {
             c = n;
         } else {
             break;
         }
     }
-    free(vbuf->array);
+    vPortFree(vbuf->array);
 }
 
 void msgpack_vrefbuffer_clear(msgpack_vrefbuffer* vbuf)
@@ -86,7 +86,7 @@ void msgpack_vrefbuffer_clear(msgpack_vrefbuffer* vbuf)
     msgpack_vrefbuffer_chunk* n;
     while(c != NULL) {
         n = c->next;
-        free(c);
+        vPortFree(c);
         c = n;
     }
 
@@ -108,8 +108,9 @@ int msgpack_vrefbuffer_append_ref(msgpack_vrefbuffer* vbuf,
         const size_t nused = (size_t)(vbuf->tail - vbuf->array);
         const size_t nnext = nused * 2;
 
-        struct iovec* nvec = (struct iovec*)realloc(
-                vbuf->array, sizeof(struct iovec)*nnext);
+        /*struct iovec* nvec = (struct iovec*)realloc(
+                vbuf->array, sizeof(struct iovec)*nnext);*/
+        struct iovec* nvec = (struct iovec*)pvPortMalloc(sizeof(struct iovec)*nnext);
         if(nvec == NULL) {
             return -1;
         }
@@ -142,7 +143,7 @@ int msgpack_vrefbuffer_append_copy(msgpack_vrefbuffer* vbuf,
         if((sizeof(msgpack_vrefbuffer_chunk) + sz) < sz){
             return -1;
         }
-        chunk = (msgpack_vrefbuffer_chunk*)malloc(
+        chunk = (msgpack_vrefbuffer_chunk*)pvPortMalloc(
                 sizeof(msgpack_vrefbuffer_chunk) + sz);
         if(chunk == NULL) {
             return -1;
@@ -177,7 +178,7 @@ int msgpack_vrefbuffer_migrate(msgpack_vrefbuffer* vbuf, msgpack_vrefbuffer* to)
         return -1;
     }
 
-    empty = (msgpack_vrefbuffer_chunk*)malloc(
+    empty = (msgpack_vrefbuffer_chunk*)pvPortMalloc(
             sizeof(msgpack_vrefbuffer_chunk) + sz);
     if(empty == NULL) {
         return -1;
@@ -201,10 +202,11 @@ int msgpack_vrefbuffer_migrate(msgpack_vrefbuffer* vbuf, msgpack_vrefbuffer* to)
                 nnext = tmp_nnext;
             }
 
-            nvec = (struct iovec*)realloc(
-                    to->array, sizeof(struct iovec)*nnext);
+            //nvec = (struct iovec*)realloc(
+            //        to->array, sizeof(struct iovec)*nnext);
+            nvec = (struct iovec*)pvPortMalloc(sizeof(struct iovec)*nnext);
             if(nvec == NULL) {
-                free(empty);
+                vPortFree(empty);
                 return -1;
             }
 

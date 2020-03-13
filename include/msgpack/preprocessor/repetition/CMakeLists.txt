@@ -1,0 +1,21 @@
+add_subdirectory(detail)
+target_sources(msgpackc
+	INTERFACE
+		for.hpp;
+		repeat_from_to.hpp;
+		enum.hpp;
+		deduce_r.hpp;
+		enum_trailing.hpp;
+		enum_params.hpp;
+		enum_params_with_a_default.hpp;
+		repeat.hpp;
+		enum_shifted_binary_params.hpp;
+		enum_trailing_params.hpp;
+		enum_shifted.hpp;
+		enum_binary_params.hpp;
+		deduce_z.hpp;
+		enum_shifted_params.hpp;
+		enum_params_with_defaults.hpp;
+		enum_trailing_binary_params.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

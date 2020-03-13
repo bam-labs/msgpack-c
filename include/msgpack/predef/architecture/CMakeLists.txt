@@ -1,0 +1,23 @@
+add_subdirectory(x86)
+target_sources(msgpackc
+	INTERFACE
+		mips.h;
+		blackfin.h;
+		sparc.h;
+		m68k.h;
+		rs6k.h;
+		ia64.h;
+		arm.h;
+		alpha.h;
+		superh.h;
+		z.h;
+		pyramid.h;
+		x86.h;
+		parisc.h;
+		ppc.h;
+		sys370.h;
+		ptx.h;
+		convex.h;
+		sys390.h
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

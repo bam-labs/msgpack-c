@@ -1,0 +1,32 @@
+add_subdirectory(detail)
+target_sources(msgpackc
+	INTERFACE
+		variadic_seq_to_seq.hpp;
+		to_tuple.hpp;
+		insert.hpp;
+		fold_right.hpp;
+		for_each_i.hpp;
+		for_each_product.hpp;
+		size.hpp;
+		to_array.hpp;
+		push_front.hpp;
+		transform.hpp;
+		enum.hpp;
+		rest_n.hpp;
+		fold_left.hpp;
+		pop_front.hpp;
+		first_n.hpp;
+		replace.hpp;
+		push_back.hpp;
+		cat.hpp;
+		seq.hpp;
+		to_list.hpp;
+		reverse.hpp;
+		remove.hpp;
+		filter.hpp;
+		for_each.hpp;
+		subseq.hpp;
+		elem.hpp;
+		pop_back.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

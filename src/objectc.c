@@ -19,22 +19,25 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined(_MSC_VER)
-#if _MSC_VER >= 1800
+//#if defined(_MSC_VER)
+//#if _MSC_VER >= 1800
 #include <inttypes.h>
-#else
-#define PRIu64 "I64u"
-#define PRIi64 "I64i"
-#define PRIi8 "i"
-#endif
-#else
-#include <inttypes.h>
-#endif
+//#else
+//#define PRIu64 "I64u"
+//#define PRIi64 "I64i"
+//#define PRIi8 "i"
+//#endif
+//#else
+//#include <inttypes.h>
+//#endif
+#  undef  PRIu64
 
 #if defined(_KERNEL_MODE)
 #  undef  snprintf
 #  define snprintf _snprintf
 #endif
+
+#include "fsl_debug_console.h"
 
 int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 {
@@ -132,11 +135,11 @@ static void msgpack_object_bin_print(FILE* out, const char *ptr, size_t size)
     size_t i;
     for (i = 0; i < size; ++i) {
         if (ptr[i] == '"') {
-            fputs("\\\"", out);
+            PRINTF("\\\"");
         } else if (isprint((unsigned char)ptr[i])) {
-            fputc(ptr[i], out);
+            PRINTF(ptr[i]);
         } else {
-            fprintf(out, "\\x%02x", (unsigned char)ptr[i]);
+            PRINTF( "\\x%02x", (unsigned char)ptr[i]);
         }
     }
 }
@@ -145,108 +148,109 @@ void msgpack_object_print(FILE* out, msgpack_object o)
 {
     switch(o.type) {
     case MSGPACK_OBJECT_NIL:
-        fprintf(out, "nil");
+        PRINTF( "nil");
         break;
 
     case MSGPACK_OBJECT_BOOLEAN:
-        fprintf(out, (o.via.boolean ? "true" : "false"));
+        PRINTF( (o.via.boolean ? "true" : "false"));
         break;
 
     case MSGPACK_OBJECT_POSITIVE_INTEGER:
 #if defined(PRIu64)
-        fprintf(out, "%" PRIu64, o.via.u64);
+        PRINTF( "%" PRIu64, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX)
-            fprintf(out, "over 4294967295");
+            PRINTF( "over 4294967295");
         else
-            fprintf(out, "%lu", (unsigned long)o.via.u64);
+            PRINTF( "%d", (unsigned long)o.via.u64);
 #endif
         break;
 
     case MSGPACK_OBJECT_NEGATIVE_INTEGER:
 #if defined(PRIi64)
-        fprintf(out, "%" PRIi64, o.via.i64);
+        PRINTF( "%" PRIi64, o.via.i64);
 #else
         if (o.via.i64 > LONG_MAX)
-            fprintf(out, "over +2147483647");
+            PRINTF( "over +2147483647");
         else if (o.via.i64 < LONG_MIN)
-            fprintf(out, "under -2147483648");
+            PRINTF( "under -2147483648");
         else
-            fprintf(out, "%ld", (signed long)o.via.i64);
+            PRINTF( "%ld", (signed long)o.via.i64);
 #endif
         break;
 
     case MSGPACK_OBJECT_FLOAT32:
     case MSGPACK_OBJECT_FLOAT64:
-        fprintf(out, "%f", o.via.f64);
+        PRINTF( "%f", o.via.f64);
         break;
 
     case MSGPACK_OBJECT_STR:
-        fprintf(out, "\"");
-        fwrite(o.via.str.ptr, o.via.str.size, 1, out);
-        fprintf(out, "\"");
+        PRINTF( "\"");
+        //fwrite(o.via.str.ptr, o.via.str.size, 1, out);
+        PRINTF("%s", o.via.str.ptr);
+        PRINTF( "\"");
         break;
 
     case MSGPACK_OBJECT_BIN:
-        fprintf(out, "\"");
+        PRINTF( "\"");
         msgpack_object_bin_print(out, o.via.bin.ptr, o.via.bin.size);
-        fprintf(out, "\"");
+        PRINTF( "\"");
         break;
 
     case MSGPACK_OBJECT_EXT:
 #if defined(PRIi8)
-        fprintf(out, "(ext: %" PRIi8 ")", o.via.ext.type);
+        PRINTF( "(ext: %" PRIi8 ")", o.via.ext.type);
 #else
-        fprintf(out, "(ext: %d)", (int)o.via.ext.type);
+        PRINTF( "(ext: %d)", (int)o.via.ext.type);
 #endif
-        fprintf(out, "\"");
+        PRINTF( "\"");
         msgpack_object_bin_print(out, o.via.ext.ptr, o.via.ext.size);
-        fprintf(out, "\"");
+        PRINTF( "\"");
         break;
 
     case MSGPACK_OBJECT_ARRAY:
-        fprintf(out, "[");
+        PRINTF( "[");
         if(o.via.array.size != 0) {
             msgpack_object* p = o.via.array.ptr;
             msgpack_object* const pend = o.via.array.ptr + o.via.array.size;
             msgpack_object_print(out, *p);
             ++p;
             for(; p < pend; ++p) {
-                fprintf(out, ", ");
+                PRINTF( ", ");
                 msgpack_object_print(out, *p);
             }
         }
-        fprintf(out, "]");
+        PRINTF( "]");
         break;
 
     case MSGPACK_OBJECT_MAP:
-        fprintf(out, "{");
+        PRINTF( "{");
         if(o.via.map.size != 0) {
             msgpack_object_kv* p = o.via.map.ptr;
             msgpack_object_kv* const pend = o.via.map.ptr + o.via.map.size;
             msgpack_object_print(out, p->key);
-            fprintf(out, "=>");
+            PRINTF( "=>");
             msgpack_object_print(out, p->val);
             ++p;
             for(; p < pend; ++p) {
-                fprintf(out, ", ");
+                PRINTF( ", ");
                 msgpack_object_print(out, p->key);
-                fprintf(out, "=>");
+                PRINTF( "=>");
                 msgpack_object_print(out, p->val);
             }
         }
-        fprintf(out, "}");
+        PRINTF( "}");
         break;
 
     default:
         // FIXME
 #if defined(PRIu64)
-        fprintf(out, "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
+        PRINTF( "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX)
-            fprintf(out, "#<UNKNOWN %i over 4294967295>", o.type);
+            PRINTF( "#<UNKNOWN %i over 4294967295>", o.type);
         else
-            fprintf(out, "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
+            PRINTF( "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
 #endif
 
     }

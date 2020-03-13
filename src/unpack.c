@@ -345,7 +345,7 @@ static inline void decr_count(void* buffer)
 {
     // atomic if(--*(_msgpack_atomic_counter_t*)buffer == 0) { free(buffer); }
     if(_msgpack_sync_decr_and_fetch((volatile _msgpack_atomic_counter_t*)buffer) == 0) {
-        free(buffer);
+        vPortFree(buffer);
     }
 }
 
@@ -369,14 +369,14 @@ bool msgpack_unpacker_init(msgpack_unpacker* mpac, size_t initial_buffer_size)
         initial_buffer_size = COUNTER_SIZE;
     }
 
-    buffer = (char*)malloc(initial_buffer_size);
+    buffer = (char*)pvPortMalloc(initial_buffer_size);
     if(buffer == NULL) {
         return false;
     }
 
-    ctx = malloc(sizeof(template_context));
+    ctx = pvPortMalloc(sizeof(template_context));
     if(ctx == NULL) {
-        free(buffer);
+        vPortFree(buffer);
         return false;
     }
 
@@ -401,19 +401,19 @@ bool msgpack_unpacker_init(msgpack_unpacker* mpac, size_t initial_buffer_size)
 void msgpack_unpacker_destroy(msgpack_unpacker* mpac)
 {
     msgpack_zone_free(mpac->z);
-    free(mpac->ctx);
+    vPortFree(mpac->ctx);
     decr_count(mpac->buffer);
 }
 
 msgpack_unpacker* msgpack_unpacker_new(size_t initial_buffer_size)
 {
-    msgpack_unpacker* mpac = (msgpack_unpacker*)malloc(sizeof(msgpack_unpacker));
+    msgpack_unpacker* mpac = (msgpack_unpacker*)pvPortMalloc(sizeof(msgpack_unpacker));
     if(mpac == NULL) {
         return NULL;
     }
 
     if(!msgpack_unpacker_init(mpac, initial_buffer_size)) {
-        free(mpac);
+        vPortFree(mpac);
         return NULL;
     }
 
@@ -423,7 +423,7 @@ msgpack_unpacker* msgpack_unpacker_new(size_t initial_buffer_size)
 void msgpack_unpacker_free(msgpack_unpacker* mpac)
 {
     msgpack_unpacker_destroy(mpac);
-    free(mpac);
+    vPortFree(mpac);
 }
 
 bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size)
@@ -452,7 +452,8 @@ bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size)
             next_size = tmp_next_size;
         }
 
-        tmp = (char*)realloc(mpac->buffer, next_size);
+        //tmp = (char*)realloc(mpac->buffer, next_size);
+        tmp = pvPortMalloc(next_size);
         if(tmp == NULL) {
             return false;
         }
@@ -473,7 +474,7 @@ bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size)
             next_size = tmp_next_size;
         }
 
-        tmp = (char*)malloc(next_size);
+        tmp = (char*)pvPortMalloc(next_size);
         if(tmp == NULL) {
             return false;
         }
@@ -484,7 +485,7 @@ bool msgpack_unpacker_expand_buffer(msgpack_unpacker* mpac, size_t size)
 
         if(CTX_REFERENCED(mpac)) {
             if(!msgpack_zone_push_finalizer(mpac->z, decr_count, mpac->buffer)) {
-                free(tmp);
+                vPortFree(tmp);
                 return false;
             }
             CTX_REFERENCED(mpac) = false;

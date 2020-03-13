@@ -1,0 +1,70 @@
+add_subdirectory(repetition)
+add_subdirectory(variadic)
+add_subdirectory(tuple)
+add_subdirectory(config)
+add_subdirectory(array)
+add_subdirectory(seq)
+add_subdirectory(detail)
+add_subdirectory(list)
+add_subdirectory(logical)
+add_subdirectory(punctuation)
+add_subdirectory(arithmetic)
+add_subdirectory(selection)
+add_subdirectory(comparison)
+add_subdirectory(iteration)
+add_subdirectory(slot)
+add_subdirectory(control)
+add_subdirectory(facilities)
+add_subdirectory(debug)
+target_sources(msgpackc
+	INTERFACE
+		facilities.hpp;
+		iteration.hpp;
+		min.hpp;
+		comma.hpp;
+		for.hpp;
+		logical.hpp;
+		selection.hpp;
+		expand.hpp;
+		repeat_2nd.hpp;
+		iterate.hpp;
+		library.hpp;
+		array.hpp;
+		repeat_from_to.hpp;
+		repeat_from_to_3rd.hpp;
+		assert_msg.hpp;
+		arithmetic.hpp;
+		control.hpp;
+		enum.hpp;
+		empty.hpp;
+		repetition.hpp;
+		dec.hpp;
+		tuple.hpp;
+		comma_if.hpp;
+		list.hpp;
+		enum_params.hpp;
+		enum_params_with_a_default.hpp;
+		debug.hpp;
+		punctuation.hpp;
+		repeat.hpp;
+		comparison.hpp;
+		slot.hpp;
+		limits.hpp;
+		cat.hpp;
+		if.hpp;
+		enum_shifted.hpp;
+		max.hpp;
+		variadic.hpp;
+		seq.hpp;
+		identity.hpp;
+		enum_shifted_params.hpp;
+		inc.hpp;
+		repeat_from_to_2nd.hpp;
+		wstringize.hpp;
+		enum_params_with_defaults.hpp;
+		while.hpp;
+		repeat_3rd.hpp;
+		stringize.hpp;
+		expr_if.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

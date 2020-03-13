@@ -140,7 +140,7 @@ inline msgpack_packer* msgpack_packer_new(void* data, msgpack_packer_write callb
 
 inline void msgpack_packer_free(msgpack_packer* pk)
 {
-    free(pk);
+    vPortFree(pk);
 }
 
 

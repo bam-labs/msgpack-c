@@ -49,13 +49,14 @@ void * add_predef_entry(const char * name, const char * description, unsigned va
     if (0 == generated_predef_info_count)
     {
         generated_predef_info_count = 1
-        generated_predef_info = (predef_info*)malloc(sizeof(predef_info))
+        generated_predef_info = (predef_info*)pvPortMalloc(sizeof(predef_info))
     }
     else
     {
         generated_predef_info_count += 1
-        generated_predef_info = (predef_info*)realloc(generated_predef_info,
-            generated_predef_info_count*sizeof(predef_info))
+       // generated_predef_info = (predef_info*)realloc(generated_predef_info,
+          //  generated_predef_info_count*sizeof(predef_info))
+        generated_predef_info = (predef_info*)pvPortMalloc(generated_predef_info_count*sizeof(predef_info))
     }
     generated_predef_info[generated_predef_info_count-1].name = name
     generated_predef_info[generated_predef_info_count-1].description = description

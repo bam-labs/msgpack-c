@@ -1,0 +1,23 @@
+add_subdirectory(bsd)
+target_sources(msgpackc
+	INTERFACE
+		vms.h;
+		ios.h;
+		amigaos.h;
+		bsd.h;
+		cygwin.h;
+		linux.h;
+		os400.h;
+		haiku.h;
+		solaris.h;
+		macos.h;
+		windows.h;
+		irix.h;
+		qnxnto.h;
+		hpux.h;
+		aix.h;
+		beos.h;
+		unix.h;
+		android.h
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

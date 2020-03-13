@@ -18,7 +18,7 @@ struct msgpack_zone_chunk {
 
 static inline bool init_chunk_list(msgpack_zone_chunk_list* cl, size_t chunk_size)
 {
-    msgpack_zone_chunk* chunk = (msgpack_zone_chunk*)malloc(
+    msgpack_zone_chunk* chunk = (msgpack_zone_chunk*)pvPortMalloc(
             sizeof(msgpack_zone_chunk) + chunk_size);
     if(chunk == NULL) {
         return false;
@@ -37,7 +37,7 @@ static inline void destroy_chunk_list(msgpack_zone_chunk_list* cl)
     msgpack_zone_chunk* c = cl->head;
     while(true) {
         msgpack_zone_chunk* n = c->next;
-        free(c);
+        vPortFree(c);
         if(n != NULL) {
             c = n;
         } else {
@@ -52,7 +52,7 @@ static inline void clear_chunk_list(msgpack_zone_chunk_list* cl, size_t chunk_si
     while(true) {
         msgpack_zone_chunk* n = c->next;
         if(n != NULL) {
-            free(c);
+            vPortFree(c);
             c = n;
         } else {
             cl->head = c;
@@ -80,7 +80,7 @@ void* msgpack_zone_malloc_expand(msgpack_zone* zone, size_t size)
         sz = tmp_sz;
     }
 
-    chunk = (msgpack_zone_chunk*)malloc(
+    chunk = (msgpack_zone_chunk*)pvPortMalloc(
             sizeof(msgpack_zone_chunk) + sz);
     if (chunk == NULL) {
         return NULL;
@@ -115,7 +115,7 @@ static inline void call_finalizer_array(msgpack_zone_finalizer_array* fa)
 static inline void destroy_finalizer_array(msgpack_zone_finalizer_array* fa)
 {
     call_finalizer_array(fa);
-    free(fa->array);
+    vPortFree(fa->array);
 }
 
 static inline void clear_finalizer_array(msgpack_zone_finalizer_array* fa)
@@ -141,8 +141,9 @@ bool msgpack_zone_push_finalizer_expand(msgpack_zone* zone,
         nnext = nused * 2;
     }
 
-    tmp = (msgpack_zone_finalizer*)realloc(fa->array,
-                sizeof(msgpack_zone_finalizer) * nnext);
+    //tmp = (msgpack_zone_finalizer*)realloc(fa->array,
+     //           sizeof(msgpack_zone_finalizer) * nnext);
+    tmp = (msgpack_zone_finalizer*)pvPortMalloc(sizeof(msgpack_zone_finalizer) * nnext);
     if(tmp == NULL) {
         return false;
     }
@@ -196,7 +197,7 @@ bool msgpack_zone_init(msgpack_zone* zone, size_t chunk_size)
 
 msgpack_zone* msgpack_zone_new(size_t chunk_size)
 {
-    msgpack_zone* zone = (msgpack_zone*)malloc(
+    msgpack_zone* zone = (msgpack_zone*)pvPortMalloc(
             sizeof(msgpack_zone));
     if(zone == NULL) {
         return NULL;
@@ -205,7 +206,7 @@ msgpack_zone* msgpack_zone_new(size_t chunk_size)
     zone->chunk_size = chunk_size;
 
     if(!init_chunk_list(&zone->chunk_list, chunk_size)) {
-        free(zone);
+        vPortFree(zone);
         return NULL;
     }
 
@@ -218,5 +219,5 @@ void msgpack_zone_free(msgpack_zone* zone)
 {
     if(zone == NULL) { return; }
     msgpack_zone_destroy(zone);
-    free(zone);
+    vPortFree(zone);
 }

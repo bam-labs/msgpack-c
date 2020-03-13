@@ -1,0 +1,24 @@
+add_subdirectory(hardware)
+add_subdirectory(platform)
+add_subdirectory(other)
+add_subdirectory(library)
+add_subdirectory(language)
+add_subdirectory(architecture)
+add_subdirectory(detail)
+add_subdirectory(os)
+add_subdirectory(compiler)
+target_sources(msgpackc
+	INTERFACE
+		make.h;
+		architecture.h;
+		version.h;
+		compiler.h;
+		other.h;
+		library.h;
+		os.h;
+		language.h;
+		version_number.h;
+		hardware.h;
+		platform.h
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

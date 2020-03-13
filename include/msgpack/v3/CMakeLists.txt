@@ -1,0 +1,28 @@
+add_subdirectory(adaptor)
+add_subdirectory(detail)
+target_sources(msgpackc
+	INTERFACE
+		unpack_decl.hpp;
+		parse_return.hpp;
+		meta_decl.hpp;
+		object_decl.hpp;
+		object_fwd_decl.hpp;
+		unpack.hpp;
+		x3_parse_decl.hpp;
+		fbuffer_decl.hpp;
+		parse_decl.hpp;
+		object_fwd.hpp;
+		iterator_decl.hpp;
+		zbuffer_decl.hpp;
+		x3_unpack.hpp;
+		cpp_config_decl.hpp;
+		x3_unpack_decl.hpp;
+		sbuffer_decl.hpp;
+		zone_decl.hpp;
+		vrefbuffer_decl.hpp;
+		null_visitor_decl.hpp;
+		parse.hpp;
+		pack_decl.hpp;
+		create_object_visitor_decl.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

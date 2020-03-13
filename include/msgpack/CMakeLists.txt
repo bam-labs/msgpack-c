@@ -1,0 +1,70 @@
+add_subdirectory(v1)
+add_subdirectory(adaptor)
+add_subdirectory(v2)
+add_subdirectory(v3)
+add_subdirectory(predef)
+add_subdirectory(preprocessor)
+target_sources(msgpackc
+	INTERFACE
+		unpack_decl.hpp;
+		gcc_atomic.hpp;
+		sysdep.h;
+		pack.h;
+		zone.h;
+		version.h;
+		parse_return.hpp;
+		sbuffer.hpp;
+		fbuffer.hpp;
+		type.hpp;
+		meta_decl.hpp;
+		version_master.h;
+		x3_parse.hpp;
+		object_decl.hpp;
+		object_fwd_decl.hpp;
+		unpack.hpp;
+		x3_parse_decl.hpp;
+		gcc_atomic.h;
+		meta.hpp;
+		fbuffer_decl.hpp;
+		unpack_exception.hpp;
+		parse_decl.hpp;
+		create_object_visitor.hpp;
+		pack_define.h;
+		object_fwd.hpp;
+		iterator_decl.hpp;
+		version.hpp;
+		zbuffer_decl.hpp;
+		null_visitor.hpp;
+		unpack_define.h;
+		object.hpp;
+		x3_unpack.hpp;
+		vrefbuffer.h;
+		zbuffer.hpp;
+		cpp_config_decl.hpp;
+		pack.hpp;
+		x3_unpack_decl.hpp;
+		util.h;
+		sbuffer_decl.hpp;
+		zone_decl.hpp;
+		vrefbuffer_decl.hpp;
+		object.h;
+		null_visitor_decl.hpp;
+		vrefbuffer.hpp;
+		unpack.h;
+		zone.hpp;
+		preprocessor.hpp;
+		zbuffer.h;
+		timestamp.h;
+		iterator.hpp;
+		pack_template.h;
+		sbuffer.h;
+		parse.hpp;
+		fbuffer.h;
+		predef.h;
+		unpack_template.h;
+		pack_decl.hpp;
+		cpp_config.hpp;
+		create_object_visitor_decl.hpp;
+		versioning.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

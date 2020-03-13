@@ -1,0 +1,34 @@
+target_sources(msgpackc
+	INTERFACE
+		dignus.h;
+		metrowerks.h;
+		ibm.h;
+		clang.h;
+		sgi_mipspro.h;
+		edg.h;
+		tendra.h;
+		visualc.h;
+		compaq.h;
+		comeau.h;
+		sunpro.h;
+		llvm.h;
+		diab.h;
+		iar.h;
+		intel.h;
+		microtec.h;
+		hp_acc.h;
+		watcom.h;
+		mpw.h;
+		pgi.h;
+		gcc.h;
+		ekopath.h;
+		greenhills.h;
+		nvcc.h;
+		digitalmars.h;
+		palm.h;
+		gcc_xml.h;
+		metaware.h;
+		kai.h;
+		borland.h
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

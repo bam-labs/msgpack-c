@@ -1,0 +1,49 @@
+add_subdirectory(cpp11)
+add_subdirectory(cpp17)
+add_subdirectory(tr1)
+add_subdirectory(boost)
+add_subdirectory(detail)
+target_sources(msgpackc
+	INTERFACE
+		size_equal_only_decl.hpp;
+		pair.hpp;
+		nil_decl.hpp;
+		vector_bool.hpp;
+		adaptor_base.hpp;
+		ext_decl.hpp;
+		char_ptr.hpp;
+		bool.hpp;
+		adaptor_base_decl.hpp;
+		check_container_size.hpp;
+		vector_unsigned_char.hpp;
+		raw.hpp;
+		array_ref.hpp;
+		nil.hpp;
+		raw_decl.hpp;
+		vector.hpp;
+		map.hpp;
+		float.hpp;
+		int_decl.hpp;
+		fixint_decl.hpp;
+		list.hpp;
+		carray.hpp;
+		size_equal_only.hpp;
+		msgpack_tuple_decl.hpp;
+		map_decl.hpp;
+		wstring.hpp;
+		msgpack_tuple.hpp;
+		set.hpp;
+		define_decl.hpp;
+		string.hpp;
+		deque.hpp;
+		ext.hpp;
+		int.hpp;
+		check_container_size_decl.hpp;
+		array_ref_decl.hpp;
+		fixint.hpp;
+		v4raw.hpp;
+		vector_char.hpp;
+		v4raw_decl.hpp;
+		define.hpp
+)
+target_include_directories(msgpackc INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
