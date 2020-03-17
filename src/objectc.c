@@ -33,11 +33,14 @@
 #  undef  PRIu64
 
 #if defined(_KERNEL_MODE)
-#  undef  snPRINTF
-#  define snPRINTF _snPRINTF
+#  undef  snclog_info
+#  define snclog_info _snclog_info
 #endif
 
 #include "fsl_debug_console.h"
+#include "clog.h"
+
+#define LOG_ZONE 'E'
 
 int msgpack_pack_object(msgpack_packer* pk, msgpack_object d)
 {
@@ -135,11 +138,11 @@ static void msgpack_object_bin_print(FILE* out, const char *ptr, size_t size)
     size_t i;
     for (i = 0; i < size; ++i) {
         if (ptr[i] == '"') {
-            PRINTF("\\\"");
+            clog_info("\\\"");
         } else if (isprint((unsigned char)ptr[i])) {
-            PRINTF(ptr[i]);
+            clog_info(ptr[i]);
         } else {
-            PRINTF( "\\x%02x", (unsigned char)ptr[i]);
+            clog_info( "\\x%02x", (unsigned char)ptr[i]);
         }
     }
 }
@@ -149,113 +152,113 @@ void msgpack_object_print(FILE* out, msgpack_object o)
     int i = 0;
     switch(o.type) {
     case MSGPACK_OBJECT_NIL:
-        PRINTF( "nil");
+        clog_info( "nil");
         break;
 
     case MSGPACK_OBJECT_BOOLEAN:
-        PRINTF( (o.via.boolean ? "true" : "false"));
+        clog_info( (o.via.boolean ? "true" : "false"));
         break;
 
     case MSGPACK_OBJECT_POSITIVE_INTEGER:
 #if defined(PRIu64)
-        PRINTF( "%" PRIu64, o.via.u64);
+        clog_info( "%" PRIu64, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX)
-            PRINTF( "over 4294967295");
+            clog_info( "over 4294967295");
         else
-            PRINTF( "%d", (unsigned long)o.via.u64);
+            clog_info( "%d", (unsigned long)o.via.u64);
 #endif
         break;
 
     case MSGPACK_OBJECT_NEGATIVE_INTEGER:
 #if defined(PRIi64)
-        PRINTF( "%" PRIi64, o.via.i64);
+        clog_info( "%" PRIi64, o.via.i64);
 #else
         if (o.via.i64 > LONG_MAX)
-            PRINTF( "over +2147483647");
+            clog_info( "over +2147483647");
         else if (o.via.i64 < LONG_MIN)
-            PRINTF( "under -2147483648");
+            clog_info( "under -2147483648");
         else
-            PRINTF( "%ld", (signed long)o.via.i64);
+            clog_info( "%ld", (signed long)o.via.i64);
 #endif
         break;
 
     case MSGPACK_OBJECT_FLOAT32:
     case MSGPACK_OBJECT_FLOAT64:
-        PRINTF( "%f", o.via.f64);
+        clog_info( "%f", o.via.f64);
         break;
 
     case MSGPACK_OBJECT_STR:
-        PRINTF( "\"");
+        clog_info( "\"");
         //fwrite(o.via.str.ptr, o.via.str.size, 1, out);
         char *cptr = o.via.str.ptr;
         for (i=0; i<o.via.str.size; i++)
         {
-            PRINTF("%c", *cptr++);
+            clog_info("%c", *cptr++);
         }
-        PRINTF( "\"");
+        clog_info( "\"");
         break;
 
     case MSGPACK_OBJECT_BIN:
-        PRINTF( "\"");
+        clog_info( "\"");
         msgpack_object_bin_print(out, o.via.bin.ptr, o.via.bin.size);
-        PRINTF( "\"");
+        clog_info( "\"");
         break;
 
     case MSGPACK_OBJECT_EXT:
 #if defined(PRIi8)
-        PRINTF( "(ext: %" PRIi8 ")", o.via.ext.type);
+        clog_info( "(ext: %" PRIi8 ")", o.via.ext.type);
 #else
-        PRINTF( "(ext: %d)", (int)o.via.ext.type);
+        clog_info( "(ext: %d)", (int)o.via.ext.type);
 #endif
-        PRINTF( "\"");
+        clog_info( "\"");
         msgpack_object_bin_print(out, o.via.ext.ptr, o.via.ext.size);
-        PRINTF( "\"");
+        clog_info( "\"");
         break;
 
     case MSGPACK_OBJECT_ARRAY:
-        PRINTF( "[");
+        clog_info( "[");
         if(o.via.array.size != 0) {
             msgpack_object* p = o.via.array.ptr;
             msgpack_object* const pend = o.via.array.ptr + o.via.array.size;
             msgpack_object_print(out, *p);
             ++p;
             for(; p < pend; ++p) {
-                PRINTF( ", ");
+                clog_info( ", ");
                 msgpack_object_print(out, *p);
             }
         }
-        PRINTF( "]");
+        clog_info( "]");
         break;
 
     case MSGPACK_OBJECT_MAP:
-        PRINTF( "{");
+        clog_info( "{");
         if(o.via.map.size != 0) {
             msgpack_object_kv* p = o.via.map.ptr;
             msgpack_object_kv* const pend = o.via.map.ptr + o.via.map.size;
             msgpack_object_print(out, p->key);
-            PRINTF( "=>");
+            clog_info( "=>");
             msgpack_object_print(out, p->val);
             ++p;
             for(; p < pend; ++p) {
-                PRINTF( ", ");
+                clog_info( ", ");
                 msgpack_object_print(out, p->key);
-                PRINTF( "=>");
+                clog_info( "=>");
                 msgpack_object_print(out, p->val);
             }
         }
-        PRINTF( "}");
+        clog_info( "}");
         break;
 
     default:
         // FIXME
 #if defined(PRIu64)
-        PRINTF( "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
+        clog_info( "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX)
-            PRINTF( "#<UNKNOWN %i over 4294967295>", o.type);
+            clog_info( "#<UNKNOWN %i over 4294967295>", o.type);
         else
-            PRINTF( "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
+            clog_info( "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
 #endif
 
     }
@@ -278,7 +281,7 @@ static int msgpack_object_bin_print_buffer(char *buffer, size_t buffer_size, con
 
     for (i = 0; i < size; ++i) {
         if (ptr[i] == '"') {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\\\"");
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\\\"");
         } else if (isprint((unsigned char)ptr[i])) {
             if (aux_buffer_size > 0) {
                 memcpy(aux_buffer, ptr + i, 1);
@@ -286,7 +289,7 @@ static int msgpack_object_bin_print_buffer(char *buffer, size_t buffer_size, con
                 aux_buffer_size = aux_buffer_size - 1;
             }
         } else {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\\x%02x", (unsigned char)ptr[i]);
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\\x%02x", (unsigned char)ptr[i]);
         }
     }
 
@@ -300,110 +303,110 @@ int msgpack_object_print_buffer(char *buffer, size_t buffer_size, msgpack_object
     int ret;
     switch(o.type) {
     case MSGPACK_OBJECT_NIL:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "nil");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "nil");
         break;
 
     case MSGPACK_OBJECT_BOOLEAN:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, (o.via.boolean ? "true" : "false"));
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, (o.via.boolean ? "true" : "false"));
         break;
 
     case MSGPACK_OBJECT_POSITIVE_INTEGER:
 #if defined(PRIu64)
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%" PRIu64, o.via.u64);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%" PRIu64, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX) {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "over 4294967295");
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "over 4294967295");
         } else {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%lu", (unsigned long)o.via.u64);
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%lu", (unsigned long)o.via.u64);
         }
 #endif
         break;
 
     case MSGPACK_OBJECT_NEGATIVE_INTEGER:
 #if defined(PRIi64)
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%" PRIi64, o.via.i64);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%" PRIi64, o.via.i64);
 #else
         if (o.via.i64 > LONG_MAX) {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "over +2147483647");
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "over +2147483647");
         } else if (o.via.i64 < LONG_MIN) {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "under -2147483648");
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "under -2147483648");
         } else {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%ld", (signed long)o.via.i64);
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%ld", (signed long)o.via.i64);
         }
 #endif
         break;
 
     case MSGPACK_OBJECT_FLOAT32:
     case MSGPACK_OBJECT_FLOAT64:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%f", o.via.f64);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%f", o.via.f64);
         break;
 
     case MSGPACK_OBJECT_STR:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "%.*s", (int)o.via.str.size, o.via.str.ptr);
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "%.*s", (int)o.via.str.size, o.via.str.ptr);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
         break;
 
     case MSGPACK_OBJECT_BIN:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
         MSGPACK_CHECKED_CALL(ret, msgpack_object_bin_print_buffer, aux_buffer, aux_buffer_size, o.via.bin.ptr, o.via.bin.size);
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
         break;
 
     case MSGPACK_OBJECT_EXT:
 #if defined(PRIi8)
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "(ext: %" PRIi8 ")", o.via.ext.type);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "(ext: %" PRIi8 ")", o.via.ext.type);
 #else
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "(ext: %d)", (int)o.via.ext.type);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "(ext: %d)", (int)o.via.ext.type);
 #endif
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
         MSGPACK_CHECKED_CALL(ret, msgpack_object_bin_print_buffer, aux_buffer, aux_buffer_size, o.via.ext.ptr, o.via.ext.size);
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "\"");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "\"");
         break;
 
     case MSGPACK_OBJECT_ARRAY:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "[");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "[");
         if(o.via.array.size != 0) {
             msgpack_object* p = o.via.array.ptr;
             msgpack_object* const pend = o.via.array.ptr + o.via.array.size;
             MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, *p);
             ++p;
             for(; p < pend; ++p) {
-                MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, ", ");
+                MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, ", ");
                 MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, *p);
             }
         }
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "]");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "]");
         break;
 
     case MSGPACK_OBJECT_MAP:
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "{");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "{");
         if(o.via.map.size != 0) {
             msgpack_object_kv* p = o.via.map.ptr;
             msgpack_object_kv* const pend = o.via.map.ptr + o.via.map.size;
             MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, p->key);
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "=>");
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "=>");
             MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, p->val);
             ++p;
             for(; p < pend; ++p) {
-                MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, ", ");
+                MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, ", ");
                 MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, p->key);
-                MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "=>");
+                MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "=>");
                 MSGPACK_CHECKED_CALL(ret, msgpack_object_print_buffer, aux_buffer, aux_buffer_size, p->val);
             }
         }
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "}");
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "}");
         break;
 
     default:
     // FIXME
 #if defined(PRIu64)
-        MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
+        MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "#<UNKNOWN %i %" PRIu64 ">", o.type, o.via.u64);
 #else
         if (o.via.u64 > ULONG_MAX) {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "#<UNKNOWN %i over 4294967295>", o.type);
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "#<UNKNOWN %i over 4294967295>", o.type);
         } else {
-            MSGPACK_CHECKED_CALL(ret, snPRINTF, aux_buffer, aux_buffer_size, "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
+            MSGPACK_CHECKED_CALL(ret, snclog_info, aux_buffer, aux_buffer_size, "#<UNKNOWN %i %lu>", o.type, (unsigned long)o.via.u64);
         }
 #endif
     }
