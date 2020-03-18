@@ -6,7 +6,7 @@ IF (MSGPACK_CXX11 OR MSGPACK_CXX17)
     LIST (APPEND exec_PROGRAMS
         container.cpp
         non_def_con_class.cpp
-	sleep_cmd.cpp
+	variant_example.cpp
     )
 
     IF ("${MSGPACK_DEFAULT_API_VERSION}" GREATER "1")
